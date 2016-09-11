@@ -1,70 +1,31 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
-
-
-## Loading and preprocessing the data
-```{r}
 unzip("activity.zip", "activity.csv")
 activities <- read.csv("activity.csv")
-summary(activities)
-```
 
-## What is mean total number of steps taken per day?
-Total number of steps taken per day
-```{r}
 daySteps <- sum(activities $steps, na.rm = TRUE)
 stepsPerDay <- aggregate(steps~date, data = activities, FUN = sum, na.rm = TRUE)
-```
-Histogram of total number of steps taken each day
-```{r}
 hist(stepsPerDay $steps, xlab = "Number of steps", ylab = "Days")
-stepsPerDayMedian <- median(stepsPerDay $steps)
-stepsPerDayMean <- mean(stepsPerDay $steps)
-```
-Mean and median of the total number of steps taken per day
-```{r}
-stepsPerDayMean
-stepsPerDayMedian
-```
 
-## What is the average daily activity pattern?
-Series plot of the 5-minute interval and the average number of steps taken
-```{r}
+stepsPerDayMean <- mean(stepsPerDay $steps)
+stepsPerDayMedian <- median(stepsPerDay $steps)
+
 min5Avg <- aggregate(steps~interval, data = activities, FUN = mean, na.rm=TRUE)
 plot(x = min5Avg$interval, y = min5Avg$steps, type = "l") 
-```
-5-minute interval with maximum number of steps
-```{r}
-maxSteps <- max(min5Avg $steps)
-maxInterval <- min5Avg[which(min5Avg$steps == maxSteps),] $interval
-maxInterval
-```
 
-## Imputing missing values
-Total missing values
-```{r}
+
+maxSteps <- max(min5Avg $steps)
+
+maxInterval <- min5Avg[which(min5Avg$steps == maxSteps),] $interval
+
 naCount <- sum(is.na(activities $steps))
-```
-Filling values
-```{r}
+
 clean <- activities
 clean[is.na(activities $steps),] $steps <- (stepsPerDayMean/288)
 totalStepsClean <- aggregate(steps~date, data=clean, FUN=sum, na.rm=TRUE)
 hist(totalStepsClean $steps)
-```
-Mean and median of filled values
-```{r}
-mean(totalStepsClean $steps)
-median(totalStepsClean $steps)
-```
-These values differ slightly from the first dataset. The mean is the same but the median has changed. The frequency of the interval [10.5k, 11k] has changed from 3 to 11. This is the impact of having filled NA values.
 
-## Are there differences in activity patterns between weekdays and weekends?
-```{r}
+totalStepsCleanMean <- mean(totalStepsClean $steps)
+totalStepsCleanMedian <- median(totalStepsClean $steps)
+
 clean $date <- as.Date(clean $date, format = "%Y-%m-%d")
 
 clean $weekday = as.factor(ifelse(weekdays(clean$date) %in% c("Saturday", "Sunday"), "Weekday", "Weekend"))
@@ -78,4 +39,8 @@ min5AvgWeekend <- aggregate(steps~interval, data=weekendV, FUN=mean, na.rm=TRUE)
 
 plot(x = min5AvgWeekday$interval, y = min5AvgWeekday$steps, type = "l")
 plot(x = min5AvgWeekend$interval, y = min5AvgWeekend$steps, type = "l")
-```
+
+
+library(knitr)
+render("PA1_template.Rmd")
+install.packages("rmarkdown")
